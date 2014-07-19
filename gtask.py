@@ -18,10 +18,10 @@ FLAGS = gflags.FLAGS
 # The client_id and client_secret are copied from the API Access tab on
 # the Google APIs Console
 FLOW = OAuth2WebServerFlow(
-    client_id='1045044932222-gkm68g0840p2kgp3cl6i4ek9ska766f7.apps.googleusercontent.com',
-    client_secret='9tCjCFEz_ihrrqpRh1sRBW3N',
+    client_id='',
+    client_secret='',
     scope='https://www.googleapis.com/auth/tasks',
-    user_agent='pytask/v1')
+    user_agent='')
 
 # To disable the local server feature, uncomment the following line:
 FLAGS.auth_local_webserver = False
@@ -43,7 +43,7 @@ http = credentials.authorize(http)
 # Build a service object for interacting with the API. Visit
 # the Google APIs Console
 # to get a developerKey for your own application.
-service = build(serviceName='tasks', version='v1', http=http, developerKey='AIzaSyBMA7l6Nwc_nkmmoX9W_ClUOER1MlS2Bs8')
+service = build(serviceName='tasks', version='v1', http=http, developerKey='')
 
 def main():
     tasklists = service.tasklists().list().execute()
