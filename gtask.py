@@ -133,7 +133,7 @@ def createNewTask(opts):
     if notes != '':
         task['notes'] = notes
     if due != '':
-        task['due'] = due
+        task['due'] = due + 'T00:00:00.000Z'
     tasklist = tasklists['items'][list_num-1]
     tasklistID = tasklist['id']
     result = service.tasks().insert(tasklist=tasklistID, body=task).execute()
@@ -227,7 +227,7 @@ if __name__ == '__main__':
     authenticate(json_data)
     
     parser = argparse.ArgumentParser(description='A python CLI tool to manage your google tasks')
-    parser.add_argument('-l', dest='lists', action='store_true', help='show all your tasklists names')
+    parser.add_argument('-l', dest='lists', action='store_true', help='show all your task lists names')
     parser.add_argument('-t', dest='tasks', action='store', metavar='LIST_NUM', nargs=1, type=int,
                         help='show all tasks in the specified task list')
     parser.add_argument('-T', dest='task', action='store', metavar=('LIST_NUM', 'TASK_NUM'), nargs=2,
