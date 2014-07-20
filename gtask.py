@@ -56,7 +56,7 @@ def readCredentials():
         json_data = json.load(f)
         return json_data
 
-def taskLists():
+def getTaskLists():
     tasklists = service.tasklists().list().execute()
     if len(tasklists) == 0:
         print "You don't have any task lists yet"
@@ -66,42 +66,65 @@ def taskLists():
             print i, "-", tasklist['title']
             i+=1
 
-def tasks(num):
-    if num == 0:
-        tasklist = service.tasklists().get(tasklist='@default').execute()
-        print u'\u2588', tasklist['title']
-        tasks = service.tasks().list(tasklist='@default').execute()
-        i = 1
-        for task in tasks['items']:
-            print ' ', i, task['title']
-            i+=1
+def getTasks(opt):
+    list_num = opt[0]
+    tasklists = service.tasklists().list().execute()
+    if list_num > len(tasklists['items']) or list_num == 0:
+        print "[ERROR] Please give a correct list number"
     else:
-        tasklists = service.tasklists().list().execute()
-        if num > len(tasklists['items']):
-            print "Please give a correct list number"
-        else:
-            tasklist = tasklists['items'][num-1]
-            tasklistID = tasklist['id']
-            print u'\u2588', tasklist['title']
-            tasks = service.tasks().list(tasklist=tasklistID).execute()
+        tasklist = tasklists['items'][list_num-1]  # get the specified task list object
+        tasklistID = tasklist['id']  # get the specified task list ID
+        tasks = service.tasks().list(tasklist=tasklistID).execute()
+        if 'items' in tasks:
+            print u'\u2588', tasklist['title'] # print task list title
             i = 1
             for task in tasks['items']:
                 print ' ', i, task['title']
                 i+=1
+        else:
+            print "[WARNNING] The task list '" + tasklist['title'] + "' has not yet any tasks"
 
+def createNewTaskList(list_title):
+    new_tasklist = {
+        'title': list_title
+    }
+    result = service.tasklists().insert(body=new_tasklist).execute()
+    print "[SUCCESS] The new task list '" + result['title'] + "' has been created"
+
+def updateTaskList(opts):
+    list_num, list_title = opts
+    list_num = int(list_num)
+    tasklists = service.tasklists().list().execute()
+    if list_num > len(tasklists['items']) or list_num == 0:
+        print "[ERROR] Please give a correct list number"
+    else:
+        tasklist = tasklists['items'][list_num-1]
+        tasklistID = tasklist['id']
+        list_old_title = tasklist['title']
+        tasklist['title'] = list_title
+        result = service.tasklists().update(tasklist=tasklistID, body=tasklist).execute()
+        print "[SUCCESS] Update the task list '" + list_old_title + "' to '" + result['title'] + "'"
 
 if __name__ == '__main__':
     json_data = readCredentials()
     authenticate(json_data)
     
     parser = argparse.ArgumentParser(description='A python CLI tool to manage your google tasks')
-    parser.add_argument('-l', '--lists', action='store_true', help='show all your tasklists names')
-    parser.add_argument('-t', '--tasks', action='store', metavar='listNumber', nargs='?', const='0', type=int,
+    parser.add_argument('-l', dest='lists', action='store_true', help='show all your tasklists names')
+    parser.add_argument('-t', dest='tasks', action='store', metavar='NUMBER', nargs=1, type=int,
                         help='show all tasks in the specified task list')
+    parser.add_argument('-N', dest='newList', action='store', metavar='TITLE', nargs=1, type=str,
+                        help='create a new task list')
+    parser.add_argument('-U', dest='updateList', action='store', metavar=('NUMBER', 'TITLE'), nargs=2,
+                        help='update the specified task list with the new title')
     
     args = parser.parse_args()
 
-    if args.lists == True:
-        taskLists()
-    elif args.tasks != None:
-        tasks(args.tasks)
+    if args.lists:
+        getTaskLists()
+    elif args.tasks is not None:
+        getTasks(args.tasks)
+    elif args.newList is not None:
+        createNewTaskList(args.newList)
+    elif args.updateList is not None:
+        updateTaskList(args.updateList)
