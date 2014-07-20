@@ -74,7 +74,7 @@ def getTasks(opts):
         tasklistID = tasklist['id']  # get the specified task list ID
         tasks = service.tasks().list(tasklist=tasklistID).execute()
         if 'items' in tasks:
-            print u'\u2588', tasklist['title'] # print task list title
+            print list_num, tasklist['title'] # print task list title
             for i, task in enumerate(tasks['items']):
                 print ' ', i+1, task['title']
         else:
@@ -113,6 +113,25 @@ def delTaskList(opts):
         service.tasklists().delete(tasklist=tasklistID).execute()
         print "[SUCCESS] The tast list '" + list_old_title + "' has been deleted"
 
+def delTask(opts):
+    list_num, task_num = opts
+    list_num = int(list_num)
+    task_num = int(task_num)
+    tasklists = service.tasklists().list().execute()
+    if list_num > len(tasklists['items']) or list_num == 0:
+        print "[ERROR] Please give a correct list number"
+    else:
+        tasklist = tasklists['items'][list_num-1]
+        tasklistID = tasklist['id']
+        tasks = service.tasks().list(tasklist=tasklistID).execute()
+        if task_num > len(tasks['items']) or task_num == 0:
+            print "[ERROR] Please give a correct task number"
+        else:
+            task = tasks['items'][task_num-1]
+            taskID = task['id']
+            service.tasks().delete(tasklist=tasklistID, task=taskID).execute()
+            print "[SUCCESS] The task '" + task['title'] + "' has been deleted"
+
 def createNewTask(opts):
     list_num = opts[0]
     tasklists = service.tasklists().list().execute()
@@ -143,17 +162,18 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='A python CLI tool to manage your google tasks')
     parser.add_argument('-l', dest='lists', action='store_true', help='show all your tasklists names')
-    parser.add_argument('-t', dest='tasks', action='store', metavar='NUMBER', nargs=1, type=int,
+    parser.add_argument('-t', dest='tasks', action='store', metavar='LIST_NUM', nargs=1, type=int,
                         help='show all tasks in the specified task list')
     parser.add_argument('-N', dest='newList', action='store', metavar='TITLE', nargs=1, type=str,
                         help='create a new task list')
-    parser.add_argument('-U', dest='updateList', action='store', metavar=('NUMBER', 'TITLE'), nargs=2,
+    parser.add_argument('-U', dest='updateList', action='store', metavar=('LIST_NUM', 'TITLE'), nargs=2,
                         help='update the specified task list with the new title')
-    parser.add_argument('-D', dest='delList', action='store', metavar='NUMBER', nargs=1, type=int,
+    parser.add_argument('-D', dest='delList', action='store', metavar='LIST_NUM', nargs=1, type=int,
                         help='delete the specified task list')
-    parser.add_argument('-n', dest='newTask', action='store', metavar='NUMBER', nargs=1, type=int,
+    parser.add_argument('-n', dest='newTask', action='store', metavar='LIST_NUM', nargs=1, type=int,
                         help='create a new task on the specified task list')
-
+    parser.add_argument('-d', dest='delTask', action='store', metavar=('LIST_NUM', 'TASK_NUM'), nargs=2,
+                        help='delete the specified task from the task list')
     
     args = parser.parse_args()
 
@@ -169,3 +189,5 @@ if __name__ == '__main__':
         delTaskList(args.delList)
     elif args.newTask is not None:
         createNewTask(args.newTask)
+    elif args.delTask is not None:
+        delTask(args.delTask)
