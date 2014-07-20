@@ -9,8 +9,8 @@ from apiclient.discovery import build
 from oauth2client.file import Storage
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.tools import run
-
-service = None
+from colorama import init, Fore
+init(autoreset=True)
 
 def authenticate(json_data):
     FLAGS = gflags.FLAGS
@@ -76,9 +76,38 @@ def getTasks(opts):
         if 'items' in tasks:
             print list_num, tasklist['title'] # print task list title
             for i, task in enumerate(tasks['items']):
-                print ' ', i+1, task['title']
+                if 'completed' in task:
+                    print ' ', i+1, Fore.GREEN + task['title']
+                else:
+                    print ' ', i+1, task['title']
         else:
             print "[WARNNING] The task list '" + tasklist['title'] + "' has not yet any tasks"
+
+def getTask(opts):
+    list_num, task_num = opts
+    list_num = int(list_num)
+    task_num = int(task_num)
+    tasklists = service.tasklists().list().execute()
+    if list_num > len(tasklists['items']) or list_num == 0:
+        print "[ERROR] Please give a correct list number"
+        return
+    else:
+        tasklist = tasklists['items'][list_num-1]
+        tasklistID = tasklist['id']
+        tasks = service.tasks().list(tasklist=tasklistID).execute()
+        if task_num > len(tasks['items']) or task_num == 0:
+            print "[ERROR] Please give a correct task number"
+            return
+        else:
+            task = tasks['items'][task_num-1]
+            print "Task: " + task['title']
+            if 'due' in task:
+                print "Due: " + task['due'][0:10]
+            if 'notes' in task:
+                print "Notes: " + task['notes']
+            if 'completed' in task:
+                print "Status: " + task['status']
+                print "Completed: " + task['completed'][0:10] 
 
 def createNewTaskList(list_title):
     new_tasklist = {
@@ -158,6 +187,27 @@ def delTask(opts):
             service.tasks().delete(tasklist=tasklistID, task=taskID).execute()
             print "[SUCCESS] The task '" + task['title'] + "' has been deleted"
 
+def completeTask(opts):
+    list_num, task_num = opts
+    list_num = int(list_num)
+    task_num = int(task_num)
+    tasklists = service.tasklists().list().execute()
+    if list_num > len(tasklists['items']) or list_num == 0:
+        print "[ERROR] Please give a correct list number"
+        return
+    else:
+        tasklist = tasklists['items'][list_num-1]
+        tasklistID = tasklist['id']
+        tasks = service.tasks().list(tasklist=tasklistID).execute()
+        if task_num > len(tasks['items']) or task_num == 0:
+            print "[ERROR] Please give a correct task number"
+            return
+        else:
+            task = tasks['items'][task_num-1]
+            taskID = task['id']
+            task['status'] = 'completed'
+            result = service.tasks().update(tasklist=tasklistID, task=taskID, body=task).execute()
+            print "[SUCCESS] The task '" + task['title'] + "' is marked as completed"
 
 def clearTaskList(opts):
     list_num = opts[0]
@@ -172,6 +222,7 @@ def clearTaskList(opts):
         print "[SUCCESS] All the completed task in task list '" + tasklist['title'] + "' have been cleared"
 
 if __name__ == '__main__':
+    service = None
     json_data = readCredentials()
     authenticate(json_data)
     
@@ -179,6 +230,8 @@ if __name__ == '__main__':
     parser.add_argument('-l', dest='lists', action='store_true', help='show all your tasklists names')
     parser.add_argument('-t', dest='tasks', action='store', metavar='LIST_NUM', nargs=1, type=int,
                         help='show all tasks in the specified task list')
+    parser.add_argument('-T', dest='task', action='store', metavar=('LIST_NUM', 'TASK_NUM'), nargs=2,
+                        help='show the speified task')
     parser.add_argument('-N', dest='newList', action='store', metavar='TITLE', nargs=1, type=str,
                         help='create a new task list')
     parser.add_argument('-U', dest='updateList', action='store', metavar=('LIST_NUM', 'TITLE'), nargs=2,
@@ -191,7 +244,9 @@ if __name__ == '__main__':
                         help='delete the specified task from the task list')
     parser.add_argument('-c', dest='clearList', action='store', metavar='LIST_NUM', nargs=1, type=int,
                         help='clear all completed tasks from the specified task list')
-    
+    parser.add_argument('-m', dest='markTask', action='store', metavar=('LIST_NUM', 'TASK_NUM'), nargs=2,
+                        help='mark the specified task as completed')
+
     args = parser.parse_args()
 
     if args.lists:
@@ -210,3 +265,7 @@ if __name__ == '__main__':
         delTask(args.delTask)
     elif args.clearList is not None:
         clearTaskList(args.clearList)
+    elif args.task is not None:
+        getTask(args.task)
+    elif args.markTask is not None:
+        completeTask(args.markTask)
