@@ -61,13 +61,11 @@ def getTaskLists():
     if len(tasklists) == 0:
         print "You don't have any task lists yet"
     else:
-        i = 1
-        for tasklist in tasklists['items']:
-            print i, "-", tasklist['title']
-            i+=1
+        for i, tasklist in enumerate(tasklists['items']):
+            print i+1, "-", tasklist['title']
 
-def getTasks(opt):
-    list_num = opt[0]
+def getTasks(opts):
+    list_num = opts[0]
     tasklists = service.tasklists().list().execute()
     if list_num > len(tasklists['items']) or list_num == 0:
         print "[ERROR] Please give a correct list number"
@@ -77,10 +75,8 @@ def getTasks(opt):
         tasks = service.tasks().list(tasklist=tasklistID).execute()
         if 'items' in tasks:
             print u'\u2588', tasklist['title'] # print task list title
-            i = 1
-            for task in tasks['items']:
-                print ' ', i, task['title']
-                i+=1
+            for i, task in enumerate(tasks['items']):
+                print ' ', i+1, task['title']
         else:
             print "[WARNNING] The task list '" + tasklist['title'] + "' has not yet any tasks"
 
@@ -105,6 +101,42 @@ def updateTaskList(opts):
         result = service.tasklists().update(tasklist=tasklistID, body=tasklist).execute()
         print "[SUCCESS] Update the task list '" + list_old_title + "' to '" + result['title'] + "'"
 
+def delTaskList(opts):
+    list_num = opts[0]
+    tasklists = service.tasklists().list().execute()
+    if list_num > len(tasklists['items']) or list_num == 0:
+        print "[ERROR] Please give a correct list number"
+    else:
+        tasklist = tasklists['items'][list_num-1]
+        tasklistID = tasklist['id']
+        list_old_title = tasklist['title']
+        service.tasklists().delete(tasklist=tasklistID).execute()
+        print "[SUCCESS] The tast list '" + list_old_title + "' has been deleted"
+
+def createNewTask(opts):
+    list_num = opts[0]
+    tasklists = service.tasklists().list().execute()
+    if list_num > len(tasklists['items']) or list_num == 0:
+        print "[ERROR] Please give a correct list number"
+        return
+    title = raw_input("Task title: ")
+    notes = raw_input("Task notes: ")
+    due = raw_input("Task due (YYYY-MM-DD): ")
+    if title == '':
+        print "Please input a title for your new task"
+        return
+    task = dict()
+    task['title'] = title
+    if notes != '':
+        task['notes'] = notes
+    if due != '':
+        task['due'] = due
+    tasklist = tasklists['items'][list_num-1]
+    tasklistID = tasklist['id']
+    result = service.tasks().insert(tasklist=tasklistID, body=task).execute()
+    print "[SUCCESS] The new task '" + result['title'] + "' has been created"
+
+
 if __name__ == '__main__':
     json_data = readCredentials()
     authenticate(json_data)
@@ -117,6 +149,11 @@ if __name__ == '__main__':
                         help='create a new task list')
     parser.add_argument('-U', dest='updateList', action='store', metavar=('NUMBER', 'TITLE'), nargs=2,
                         help='update the specified task list with the new title')
+    parser.add_argument('-D', dest='delList', action='store', metavar='NUMBER', nargs=1, type=int,
+                        help='delete the specified task list')
+    parser.add_argument('-n', dest='newTask', action='store', metavar='NUMBER', nargs=1, type=int,
+                        help='create a new task on the specified task list')
+
     
     args = parser.parse_args()
 
@@ -128,3 +165,7 @@ if __name__ == '__main__':
         createNewTaskList(args.newList)
     elif args.updateList is not None:
         updateTaskList(args.updateList)
+    elif args.delList is not None:
+        delTaskList(args.delList)
+    elif args.newTask is not None:
+        createNewTask(args.newTask)
