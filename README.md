@@ -55,7 +55,7 @@ For help, use `-h` option.
 
 ```
 $ gtask -h
-usage: gtask.py [-h] [-l] [-t LIST_NUM] [-T LIST_NUM TASK_NUM] [-N TITLE]
+usage: gtask.py [-h] [-v] [-l] [-t LIST_NUM] [-T LIST_NUM TASK_NUM] [-N TITLE]
                 [-U LIST_NUM TITLE] [-D LIST_NUM] [-n LIST_NUM]
                 [-d LIST_NUM TASK_NUM] [-c LIST_NUM] [-m LIST_NUM TASK_NUM]
 
@@ -63,6 +63,7 @@ A python CLI tool to manage your google tasks
 
 optional arguments:
   -h, --help            show this help message and exit
+  -v                    print the version and exit
   -l                    show all your task lists names
   -t LIST_NUM           show all tasks in the specified task list
   -T LIST_NUM TASK_NUM  show the speified task
