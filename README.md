@@ -2,7 +2,7 @@
 
 ## Description
 
-[gTask-cli][gTask-cli] is a simple python CLI tool to manage your Google Tasks. It uses the [Google APIs Client Library for Python](https://developers.google.com/api-client-library/python/) to interact with the [Google Tasks API](https://developers.google.com/google-apps/tasks/).
+[gTask-cli](https://github.com/yankuangshi/gTask-cli) is a simple python CLI tool to manage your Google Tasks. It uses the [Google APIs Client Library for Python](https://developers.google.com/api-client-library/python/) to interact with the [Google Tasks API](https://developers.google.com/google-apps/tasks/).
 
 ## Requirements
 
@@ -27,9 +27,9 @@ Before using the script, there are a few steps you need to follow to register yo
 
 *  Click `APIs` in the project pane and activate the `Google Tasks API` for your project. 
 
-*  Click `Credentials` in the project pane, in `OAuth` section create a new client ID, choose `Installed application` as `APPLICATION TYPE`. It will generate a client ID and a client secret which will be used for our tool.
+*  Click `Credentials` in the project pane, in `OAuth` section create a new client ID, choose `Installed application` as `APPLICATION TYPE`. It will generate a `client ID` and a `client secret` which will be used for our tool.
 
-*  In `Public API access` section, create a new key. Choose `Server key` from the pop-up. This will generate an API key which will be used in our script.
+*  In `Public API access` section, create a new key. Choose `Server key` from the pop-up. This will generate an `API key` which will be used in our script.
 
 Now you've finished registering your project.
 
@@ -38,11 +38,14 @@ Now you've finished registering your project.
 * Add the generated `client ID`, `client secret` and `API key` to the `credentials.json` file
 
 * For running the script anywhere from the command line and without the python command :
+
   * Make the gtask.py file executable `$ chmod +x gtask.py`
+  
   * Add the gTask-cli project directory to your `PATH` environment variable. In your `.bashrc` file, add `export PATH=/path/to/project/:$PATH` and then `source` your `.bashrc` file
+  
   * To simplify your use of the script, I recommend to add an alias to the gtask.py file, like : `alias gtask='/path/to/project/gtask.py'`
    
-**NOTE:** For the first time, There will be a dialogue to request you for the permission to access your google tasks data, just copy the generated url and paste it in a browser address bar and accept the access to your tasks data, then paste the provided key back into the terminal. The `tasks.dat` will be generated.
+**NOTE:** For the first time, There will be a dialogue to request you for the permission to access your google tasks data, just copy the generated url and paste it in a browser address bar and accept the access to your tasks data, then paste the provided key back into the terminal. The `tasks.dat` file will be generated.
 
 **NOTE:** Remember that you should never commit the credentials.json and tasks.dat files to your github.
 
@@ -159,7 +162,7 @@ optional arguments:
   ```
 
 ## You can help
-Feel free to report errors or request. Any contributions are welcomed. 
+Feel free to report errors or requests. Any contributions are welcomed. 
 
 ## License
 gTask-cli is relesed under the MIT License.
