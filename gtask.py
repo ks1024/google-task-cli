@@ -13,6 +13,8 @@ from oauth2client.tools import run
 from colorama import init, Fore
 init(autoreset=True)
 
+version = 'version 1.0.0'
+
 def authenticate(json_data):
     FLAGS = gflags.FLAGS
 
@@ -234,6 +236,7 @@ if __name__ == '__main__':
     authenticate(json_data)
     
     parser = argparse.ArgumentParser(description='A python CLI tool to manage your google tasks')
+    parser.add_argument('-v', dest='version', action='store_true', help='print the version and exit')
     parser.add_argument('-l', dest='lists', action='store_true', help='show all your task lists names')
     parser.add_argument('-t', dest='tasks', action='store', metavar='LIST_NUM', nargs=1, type=int,
                         help='show all tasks in the specified task list')
@@ -256,7 +259,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.lists:
+    if args.version:
+        print version
+    elif args.lists:
         getTaskLists()
     elif args.tasks is not None:
         getTasks(args.tasks)
