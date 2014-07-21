@@ -4,6 +4,7 @@ import gflags
 import httplib2
 import json
 import argparse
+import os
 
 from apiclient.discovery import build
 from oauth2client.file import Storage
@@ -35,7 +36,10 @@ def authenticate(json_data):
     # flow. The Storage object will ensure that if successful the good
     # Credentials will get written back to a file.
 
-    storage = Storage('tasks.dat')
+    script_dir = os.path.dirname(__file__)
+    rel_path = 'tasks.dat'
+    abs_file_path = os.path.join(script_dir, rel_path)
+    storage = Storage(abs_file_path)
     credentials = storage.get()
     if credentials is None or credentials.invalid == True:
         credentials = run(FLOW, storage)
@@ -52,7 +56,10 @@ def authenticate(json_data):
     service = build(serviceName='tasks', version='v1', http=http, developerKey=json_data['developerKey'])
 
 def readCredentials():
-    with open('credentials.json') as f:
+    script_dir = os.path.dirname(__file__)
+    rel_path = "credentials.json"
+    abs_file_path = os.path.join(script_dir, rel_path)
+    with open(abs_file_path) as f:
         json_data = json.load(f)
         return json_data
 
