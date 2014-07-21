@@ -161,6 +161,12 @@ optional arguments:
     2 Go to gym
     3 Finish the python project
   ```
+  
+## TODO
+- [ ] add func for updating a task
+- [ ] add func for moving a task
+- [ ] apply PEP8 convention
+- [ ] code factoring 
 
 ## You can help
 Feel free to report errors or requests. Any contributions are welcomed. 
