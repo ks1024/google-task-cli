@@ -2,6 +2,8 @@
 
 gTask is a python CLI tool to manage your Google Tasks
 
+## Installation
+
 ## Usage
 For help, use `-h`option.
 
