@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import gflags
 import httplib2
@@ -13,7 +14,7 @@ from oauth2client.tools import run
 from colorama import init, Fore
 init(autoreset=True)
 
-version = 'version 1.0.0'
+__version__ = 'version 1.0.0'
 
 def authenticate(json_data):
     FLAGS = gflags.FLAGS
@@ -57,7 +58,11 @@ def authenticate(json_data):
     global service
     service = build(serviceName='tasks', version='v1', http=http, developerKey=json_data['developerKey'])
 
-def readCredentials():
+def read_credentials():
+    """Return a json data containing user's credentials
+
+    Read user's credentials from a json file
+    """
     script_dir = os.path.dirname(__file__)
     rel_path = "credentials.json"
     abs_file_path = os.path.join(script_dir, rel_path)
@@ -65,7 +70,10 @@ def readCredentials():
         json_data = json.load(f)
         return json_data
 
-def getTaskLists():
+def get_tasklists():
+    """Print an user's all task lists
+
+    """
     tasklists = service.tasklists().list().execute()
     if len(tasklists) == 0:
         print "You don't have any task lists yet"
@@ -73,11 +81,14 @@ def getTaskLists():
         for i, tasklist in enumerate(tasklists['items']):
             print i+1, "-", tasklist['title']
 
-def getTasks(opts):
+def get_tasks(opts):
+    """Print all tasks of the specified task list
+
+    """
     list_num = opts[0]
     tasklists = service.tasklists().list().execute()
-    if list_num > len(tasklists['items']) or list_num == 0:
-        print "[ERROR] Please give a correct list number"
+    if not test_list_num(list_num, tasklists): 
+        return
     else:
         tasklist = tasklists['items'][list_num-1]  # get the specified task list object
         tasklistID = tasklist['id']  # get the specified task list ID
@@ -92,20 +103,21 @@ def getTasks(opts):
         else:
             print "[WARNNING] The task list '" + tasklist['title'] + "' has not yet any tasks"
 
-def getTask(opts):
+def get_task(opts):
+    """Print the specified task
+
+    """
     list_num, task_num = opts
     list_num = int(list_num)
     task_num = int(task_num)
     tasklists = service.tasklists().list().execute()
-    if list_num > len(tasklists['items']) or list_num == 0:
-        print "[ERROR] Please give a correct list number"
+    if not test_list_num(list_num, tasklists):
         return
     else:
         tasklist = tasklists['items'][list_num-1]
         tasklistID = tasklist['id']
         tasks = service.tasks().list(tasklist=tasklistID).execute()
-        if task_num > len(tasks['items']) or task_num == 0:
-            print "[ERROR] Please give a correct task number"
+        if not test_task_num(task_num, tasks):
             return
         else:
             task = tasks['items'][task_num-1]
@@ -118,18 +130,23 @@ def getTask(opts):
                 print "Status: " + task['status']
                 print "Completed: " + task['completed'][0:10] 
 
-def createNewTaskList(list_title):
+def create_new_tasklist(list_title):
+    """Create a new task list with a new task title
+
+    """
     new_tasklist = {
         'title': list_title
     }
     result = service.tasklists().insert(body=new_tasklist).execute()
     print "[SUCCESS] The new task list '" + result['title'] + "' has been created"
 
-def createNewTask(opts):
+def create_new_task(opts):
+    """Create a new task in the specified task list
+
+    """
     list_num = opts[0]
     tasklists = service.tasklists().list().execute()
-    if list_num > len(tasklists['items']) or list_num == 0:
-        print "[ERROR] Please give a correct list number"
+    if not test_list_num(list_num, tasklists):
         return
     title = raw_input("Task title: ")
     notes = raw_input("Task notes: ")
@@ -148,12 +165,15 @@ def createNewTask(opts):
     result = service.tasks().insert(tasklist=tasklistID, body=task).execute()
     print "[SUCCESS] The new task '" + result['title'] + "' has been created"
 
-def updateTaskList(opts):
+def update_tasklist(opts):
+    """Update the specified task list title
+
+    """
     list_num, list_title = opts
     list_num = int(list_num)
     tasklists = service.tasklists().list().execute()
-    if list_num > len(tasklists['items']) or list_num == 0:
-        print "[ERROR] Please give a correct list number"
+    if not test_list_num(list_num, tasklists):
+        return
     else:
         tasklist = tasklists['items'][list_num-1]
         tasklistID = tasklist['id']
@@ -162,11 +182,13 @@ def updateTaskList(opts):
         result = service.tasklists().update(tasklist=tasklistID, body=tasklist).execute()
         print "[SUCCESS] Update the task list '" + list_old_title + "' to '" + result['title'] + "'"
 
-def delTaskList(opts):
+def del_tasklist(opts):
+    """Delete the specified task list
+
+    """
     list_num = opts[0]
     tasklists = service.tasklists().list().execute()
-    if list_num > len(tasklists['items']) or list_num == 0:
-        print "[ERROR] Please give a correct list number"
+    if not test_list_num(list_num, tasklists):
         return
     else:
         tasklist = tasklists['items'][list_num-1]
@@ -175,20 +197,21 @@ def delTaskList(opts):
         service.tasklists().delete(tasklist=tasklistID).execute()
         print "[SUCCESS] The tast list '" + list_old_title + "' has been deleted"
 
-def delTask(opts):
+def del_task(opts):
+    """Delete the specified task 
+
+    """
     list_num, task_num = opts
     list_num = int(list_num)
     task_num = int(task_num)
     tasklists = service.tasklists().list().execute()
-    if list_num > len(tasklists['items']) or list_num == 0:
-        print "[ERROR] Please give a correct list number"
+    if not test_list_num(list_num, tasklists):
         return
     else:
         tasklist = tasklists['items'][list_num-1]
         tasklistID = tasklist['id']
         tasks = service.tasks().list(tasklist=tasklistID).execute()
-        if task_num > len(tasks['items']) or task_num == 0:
-            print "[ERROR] Please give a correct task number"
+        if not test_task_num(task_num, tasks):
             return
         else:
             task = tasks['items'][task_num-1]
@@ -196,20 +219,21 @@ def delTask(opts):
             service.tasks().delete(tasklist=tasklistID, task=taskID).execute()
             print "[SUCCESS] The task '" + task['title'] + "' has been deleted"
 
-def completeTask(opts):
+def complete_task(opts):
+    """Mark the specified task as completed
+
+    """
     list_num, task_num = opts
     list_num = int(list_num)
     task_num = int(task_num)
     tasklists = service.tasklists().list().execute()
-    if list_num > len(tasklists['items']) or list_num == 0:
-        print "[ERROR] Please give a correct list number"
+    if not test_list_num(list_num, tasklists): 
         return
     else:
         tasklist = tasklists['items'][list_num-1]
         tasklistID = tasklist['id']
         tasks = service.tasks().list(tasklist=tasklistID).execute()
-        if task_num > len(tasks['items']) or task_num == 0:
-            print "[ERROR] Please give a correct task number"
+        if not test_task_num(task_num, tasks):
             return
         else:
             task = tasks['items'][task_num-1]
@@ -218,11 +242,13 @@ def completeTask(opts):
             result = service.tasks().update(tasklist=tasklistID, task=taskID, body=task).execute()
             print "[SUCCESS] The task '" + task['title'] + "' is marked as completed"
 
-def clearTaskList(opts):
+def clear_tasklist(opts):
+    """Clear all completed task in the specified task list
+
+    """
     list_num = opts[0]
     tasklists = service.tasklists().list().execute()
-    if list_num > len(tasklists['items']) or list_num == 0:
-        print "[ERROR] Please give a correct list number"
+    if not test_list_num(list_num, tasklists):
         return
     else:
         tasklist = tasklists['items'][list_num-1]
@@ -230,9 +256,28 @@ def clearTaskList(opts):
         service.tasks().clear(tasklist=tasklistID).execute()
         print "[SUCCESS] All the completed task in task list '" + tasklist['title'] + "' have been cleared"
 
+def test_list_num(num, lists):
+    """Test if the inputed list number is correct
+
+    """
+    if num > len(lists['items']) or num == 0:
+        print "[ERROR] Please give a correct list number"
+        return False
+    return True
+
+def test_task_num(num, tasks):
+    """Test if the inputed task number is correct
+
+    """
+    if num > len(tasks['items']) or num == 0:
+        print "[ERROR] Please give a correct task number"
+        return False
+    return True
+
+
 if __name__ == '__main__':
     service = None
-    json_data = readCredentials()
+    json_data = read_credentials()
     authenticate(json_data)
     
     parser = argparse.ArgumentParser(description='A python CLI tool to manage your google tasks')
@@ -260,24 +305,24 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.version:
-        print version
+        print __version__
     elif args.lists:
-        getTaskLists()
+        get_tasklists()
     elif args.tasks is not None:
-        getTasks(args.tasks)
+        get_tasks(args.tasks)
     elif args.newList is not None:
-        createNewTaskList(args.newList)
+        create_new_tasklist(args.newList)
     elif args.updateList is not None:
-        updateTaskList(args.updateList)
+        update_tasklist(args.updateList)
     elif args.delList is not None:
-        delTaskList(args.delList)
+        del_tasklist(args.delList)
     elif args.newTask is not None:
-        createNewTask(args.newTask)
+        create_new_task(args.newTask)
     elif args.delTask is not None:
-        delTask(args.delTask)
+        del_task(args.delTask)
     elif args.clearList is not None:
-        clearTaskList(args.clearList)
+        clear_tasklist(args.clearList)
     elif args.task is not None:
-        getTask(args.task)
+        get_task(args.task)
     elif args.markTask is not None:
-        completeTask(args.markTask)
+        complete_task(args.markTask)
