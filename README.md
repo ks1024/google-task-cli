@@ -165,8 +165,8 @@ optional arguments:
 ## TODO
 - [ ] add func for updating a task
 - [ ] add func for moving a task
-- [ ] apply PEP8 convention
-- [ ] code factoring 
+- [ ] apply PEP8 coding convention
+- [ ] code refactoring 
 
 ## You can help
 Feel free to report errors or requests. Any contributions are welcomed. 
