@@ -17,9 +17,7 @@ Requires Python 2.7 to run the script. It also needs the following dependencies:
 All of dependencies above can be installed with `pip`:
 
 ```
-$ pip install --upgrade google-api-python-client
-$ pip install argparse
-$ pip install colorama
+$ pip install -r requirements.txt
 ```
 Before using the script, there are a few steps you need to follow to register your app as it needs to be authorized to make requests to google service.
 
