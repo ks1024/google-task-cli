@@ -1,8 +1,8 @@
-# gTask-cli
+# google-task-cli
 
 ## Description
 
-[gTask-cli](https://github.com/yankuangshi/gTask-cli) is a simple python CLI tool to manage your Google Tasks. It uses the [Google APIs Client Library for Python](https://developers.google.com/api-client-library/python/) to interact with the [Google Tasks API](https://developers.google.com/google-apps/tasks/).
+[google-task-cli](https://github.com/yankuangshi/google-task-cli) is a simple python CLI tool to manage your Google Tasks. It uses the [Google APIs Client Library for Python](https://developers.google.com/api-client-library/python/) to interact with the [Google Tasks API](https://developers.google.com/google-apps/tasks/).
 
 ## Requirements
 
